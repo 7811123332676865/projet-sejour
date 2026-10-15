@@ -1,6 +1,5 @@
 import {
   submitWhere,
-  inputPlace,
   locate,
   selectWhen,
   changeDate,
@@ -19,19 +18,33 @@ import {
   closeEvent,
   downloadIcs
 } from "./actions.js";
+import { searchCities, onPlaceKeydown, selectCity, closeCities } from "./cities.js";
 
 const formWhere = document.querySelector("#step-where");
 const placeInput = document.querySelector("#place");
+const cityList = document.querySelector("#city-list");
 const dateInput = document.querySelector("#date");
 const modal = document.querySelector("#ev-modal");
 
 formWhere.addEventListener("submit", (event) => {
   event.preventDefault();
-  submitWhere(placeInput.value);
+  submitWhere();
 });
 
 placeInput.addEventListener("input", () => {
-  inputPlace(placeInput.value);
+  searchCities(placeInput.value);
+});
+
+placeInput.addEventListener("keydown", (event) => {
+  onPlaceKeydown(event);
+});
+
+placeInput.addEventListener("blur", () => {
+  closeCities();
+});
+
+cityList.addEventListener("mousedown", (event) => {
+  event.preventDefault();
 });
 
 dateInput.addEventListener("change", () => {
@@ -60,6 +73,9 @@ document.addEventListener("click", (event) => {
   const value = button.dataset.value;
 
   switch (button.dataset.action) {
+    case "city":
+      selectCity(Number(value));
+      break;
     case "locate":
       locate();
       break;

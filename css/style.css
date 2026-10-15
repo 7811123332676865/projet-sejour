@@ -157,6 +157,55 @@ body {
 .wu-input:focus-visible { outline: 3px solid var(--accent); outline-offset: 1px; border-color: var(--accent); }
 .wu-input[aria-invalid="true"] { border-color: var(--danger); box-shadow: inset 0 0 0 1px var(--danger); }
 
+.wu-combo { position: relative; }
+.wu-combo .wu-input { appearance: none; }
+.wu-combo .wu-input::-webkit-search-cancel-button { display: none; }
+.wu-combo-list {
+  position: absolute;
+  z-index: 10;
+  top: calc(100% + 8px);
+  left: 0;
+  right: 0;
+  max-height: 340px;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 16px 40px rgb(31 26 22 / .16);
+  animation: wu-up .15s ease both;
+}
+.wu-combo-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background .15s, border-color .15s;
+}
+.wu-combo-icon {
+  flex: none;
+  width: 36px; height: 36px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  background: var(--bg);
+  color: var(--accent);
+}
+.wu-combo-text { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.wu-combo-text strong { font-family: var(--font-display); font-size: 1.0625rem; font-weight: 700; }
+.wu-combo-text span { font-size: .875rem; color: var(--muted); }
+.wu-combo-option:hover { background: var(--bg); }
+.wu-combo-option[aria-selected="true"] { background: var(--accent-t); border-color: var(--accent); }
+.wu-combo-option[aria-selected="true"] .wu-combo-icon { background: var(--accent); color: #fff; }
+.wu-combo-option.is-empty { justify-content: center; min-height: 48px; color: var(--muted); cursor: default; background: none; }
+
 .wu-locate {
   align-self: flex-start;
   display: inline-flex;
