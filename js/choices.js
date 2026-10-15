@@ -1,8 +1,6 @@
-function formatDay(daysFromToday) {
-  const date = new Date();
-  date.setDate(date.getDate() + daysFromToday);
-  return date.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "short" });
-}
+import { $, addDays } from "./utils.js";
+
+const formatDay = (days) => addDays(days).toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "short" });
 
 export const WHEN_CHOICES = [
   { value: "today", label: "Aujourd'hui", hint: formatDay(0) },
@@ -17,7 +15,7 @@ export const CATEGORY_CHOICES = [
   { value: "expo", label: "Expos", hint: "Art, photo, patrimoine" },
   { value: "vide-grenier", label: "Vide-greniers", hint: "Chine et bonnes affaires" },
   { value: "fete", label: "Fêtes locales", hint: "Marchés, fêtes de village" },
-  { value: "afterwork", label: "After-work", hint: "Un verre après le boulot", wide: true }
+  { value: "spectacle", label: "Spectacles", hint: "Théâtre, danse, humour", wide: true }
 ];
 
 export const RADIUS_CHOICES = [
@@ -29,17 +27,14 @@ export const RADIUS_CHOICES = [
 
 const ICON_CHECK = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" focusable="false"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
 
-function createChoice(choice, action, multiple) {
-  return `
-    <button type="button" class="wu-opt${choice.wide ? " is-wide" : ""}" aria-pressed="false" data-action="${action}" data-value="${choice.value}">
-      <span class="wu-opt-txt"><strong>${choice.label}</strong><span>${choice.hint}</span></span>
-      <span class="wu-check ${multiple ? "is-multi" : "is-single"}" aria-hidden="true">${multiple ? ICON_CHECK : ""}</span>
-    </button>`;
-}
+const createChoice = (choice, action, multiple) => `
+  <button type="button" class="wu-opt${choice.wide ? " is-wide" : ""}" aria-pressed="false" data-action="${action}" data-value="${choice.value}">
+    <span class="wu-opt-txt"><strong>${choice.label}</strong><span>${choice.hint}</span></span>
+    <span class="wu-check ${multiple ? "is-multi" : "is-single"}" aria-hidden="true">${multiple ? ICON_CHECK : ""}</span>
+  </button>`;
 
 export function renderChoices(containerId, choices, action, multiple = false) {
-  const container = document.querySelector(`#${containerId}`);
-  container.innerHTML = choices.map((choice) => createChoice(choice, action, multiple)).join("");
+  $(`#${containerId}`).innerHTML = choices.map((choice) => createChoice(choice, action, multiple)).join("");
 }
 
 export function updateChoices(containerId, selectedValues) {

@@ -284,7 +284,8 @@ body {
 .is-expo { --tk: #0f766e; }
 .is-vide-grenier { --tk: #b45309; }
 .is-fete { --tk: #be185d; }
-.is-afterwork { --tk: #1d4ed8; }
+.is-spectacle { --tk: #1d4ed8; }
+.is-autre { --tk: #5a5148; }
 
 /* ---------- Sections ---------- */
 .wu-section { padding-top: 40px; }
@@ -342,6 +343,22 @@ body {
   cursor: pointer;
 }
 .wu-btn:hover { background: var(--ink); color: #fff; }
+.wu-btn:disabled { opacity: .4; cursor: not-allowed; }
+.wu-btn:disabled:hover { background: var(--card); color: var(--ink); }
+
+.wu-pager { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.wu-pager-txt { margin: 0; font-weight: 600; color: var(--muted); text-align: center; white-space: nowrap; }
+
+@media (max-width: 479px) {
+  .wu-pager .wu-btn { width: 48px; padding: 0; }
+  .wu-pager-label {
+    position: absolute;
+    width: 1px; height: 1px;
+    margin: -1px; padding: 0;
+    overflow: hidden; clip: rect(0, 0, 0, 0);
+    white-space: nowrap; border: 0;
+  }
+}
 
 /* ---------- Carousel ---------- */
 .wu-ctrls { display: flex; gap: 8px; flex: none; }

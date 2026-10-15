@@ -1,131 +1,59 @@
-import {
-  initForm,
-  submitWhere,
-  locate,
-  selectWhen,
-  changeDate,
-  whenNext,
-  toggleCat,
-  whatNext,
-  selectRadius,
-  radiusNext,
-  back,
-  widen,
-  editWhen,
-  refine,
-  restart,
-  scrollTrack,
-  openEvent,
-  closeEvent,
-  downloadIcs
-} from "./actions.js";
+import { $ } from "./utils.js";
+import * as actions from "./actions.js";
 import { searchCities, onPlaceKeydown, selectCity, closeCities } from "./cities.js";
 
-const formWhere = document.querySelector("#step-where");
-const placeInput = document.querySelector("#place");
-const cityList = document.querySelector("#city-list");
-const dateInput = document.querySelector("#date");
-const modal = document.querySelector("#ev-modal");
+const placeInput = $("#place");
+const modal = $("#ev-modal");
 
-formWhere.addEventListener("submit", (event) => {
+const clickActions = {
+  city: selectCity,
+  locate: actions.locate,
+  back: actions.back,
+  when: actions.selectWhen,
+  "when-next": actions.whenNext,
+  cat: actions.toggleCat,
+  "what-next": actions.whatNext,
+  radius: actions.selectRadius,
+  "radius-next": actions.radiusNext,
+  "page-prev": actions.previousPage,
+  "page-next": actions.nextPage,
+  widen: actions.widen,
+  "edit-when": actions.editWhen,
+  refine: actions.refine,
+  restart: actions.restart,
+  prev: () => actions.scrollTrack(-1),
+  next: () => actions.scrollTrack(1),
+  "close-modal": actions.closeEvent,
+  ics: actions.downloadIcs
+};
+
+$("#step-where").addEventListener("submit", (event) => {
   event.preventDefault();
-  submitWhere();
+  actions.submitWhere();
 });
 
-placeInput.addEventListener("input", () => {
-  searchCities(placeInput.value);
-});
-
-placeInput.addEventListener("keydown", (event) => {
-  onPlaceKeydown(event);
-});
-
-placeInput.addEventListener("blur", () => {
-  closeCities();
-});
-
-cityList.addEventListener("mousedown", (event) => {
-  event.preventDefault();
-});
-
-dateInput.addEventListener("change", () => {
-  changeDate(dateInput.value);
-});
+placeInput.addEventListener("input", () => searchCities(placeInput.value));
+placeInput.addEventListener("keydown", onPlaceKeydown);
+placeInput.addEventListener("blur", closeCities);
+$("#city-list").addEventListener("mousedown", (event) => event.preventDefault());
+$("#date").addEventListener("change", (event) => actions.changeDate(event.target.value));
 
 modal.addEventListener("click", (event) => {
-  if (event.target === modal) {
-    closeEvent();
-  }
+  if (event.target === modal) actions.closeEvent();
 });
 
 document.addEventListener("click", (event) => {
   const eventLink = event.target.closest("[data-event]");
   if (eventLink) {
     event.preventDefault();
-    openEvent(Number(eventLink.dataset.event));
+    actions.openEvent(eventLink.dataset.event);
     return;
   }
 
   const button = event.target.closest("[data-action]");
-  if (!button) {
-    return;
-  }
-
-  const value = button.dataset.value;
-
-  switch (button.dataset.action) {
-    case "city":
-      selectCity(Number(value));
-      break;
-    case "locate":
-      locate();
-      break;
-    case "back":
-      back();
-      break;
-    case "when":
-      selectWhen(value);
-      break;
-    case "when-next":
-      whenNext();
-      break;
-    case "cat":
-      toggleCat(value);
-      break;
-    case "what-next":
-      whatNext();
-      break;
-    case "radius":
-      selectRadius(Number(value));
-      break;
-    case "radius-next":
-      radiusNext();
-      break;
-    case "widen":
-      widen();
-      break;
-    case "edit-when":
-      editWhen();
-      break;
-    case "refine":
-      refine();
-      break;
-    case "restart":
-      restart();
-      break;
-    case "prev":
-      scrollTrack(-1);
-      break;
-    case "next":
-      scrollTrack(1);
-      break;
-    case "close-modal":
-      closeEvent();
-      break;
-    case "ics":
-      downloadIcs(Number(value));
-      break;
+  if (button && clickActions[button.dataset.action]) {
+    clickActions[button.dataset.action](button.dataset.value);
   }
 });
 
-initForm();
+actions.initForm();

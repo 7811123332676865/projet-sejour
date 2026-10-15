@@ -1,38 +1,35 @@
+import { $, toIsoDate } from "./utils.js";
 import { getSelectedCity, setCity, findCityByPosition } from "./cities.js";
-import { nextStep, previousStep } from "./steps.js";
+import { nextStep, previousStep, showStep, showScreen } from "./steps.js";
 import { WHEN_CHOICES, CATEGORY_CHOICES, RADIUS_CHOICES, renderChoices, updateChoices } from "./choices.js";
+import { fetchEvents } from "./events.js";
+import { renderResults, renderError } from "./results.js";
 
-const answers = {
-  city: null,
-  when: "",
-  date: "",
-  categories: [],
-  radius: 0
-};
+const answers = { city: null, when: "", date: "", categories: [], radius: 0 };
+let currentPage = 1;
 
-function showError(id, text) {
-  document.querySelector(`#${id}`).textContent = text;
+function showMessage(id, text, type = "err") {
+  const message = $(`#${id}`);
+  message.textContent = text;
+  message.className = `wu-msg is-${type}`;
 }
 
 export function initForm() {
   renderChoices("when-opts", WHEN_CHOICES, "when");
   renderChoices("cat-opts", CATEGORY_CHOICES, "cat", true);
   renderChoices("radius-opts", RADIUS_CHOICES, "radius");
-  document.querySelector("#date").min = new Date().toLocaleDateString("fr-CA");
+  $("#date").min = toIsoDate(new Date());
 }
 
 export function submitWhere() {
-  const placeInput = document.querySelector("#place");
-  const city = getSelectedCity();
+  answers.city = getSelectedCity();
 
-  if (!city) {
-    placeInput.setAttribute("aria-invalid", "true");
-    showPlaceMessage("Choisissez une ville dans la liste.", "err");
-    placeInput.focus();
-    return;
+  if (!answers.city) {
+    $("#place").setAttribute("aria-invalid", "true");
+    $("#place").focus();
+    return showMessage("place-msg", "Choisissez une ville dans la liste.");
   }
 
-  answers.city = city;
   nextStep();
 }
 
@@ -43,38 +40,25 @@ function getPosition() {
 }
 
 function setLocating(isLocating) {
-  document.querySelector("[data-action='locate']").disabled = isLocating;
-  document.querySelector(".js-geo-spin").hidden = !isLocating;
-  document.querySelector(".js-geo-icon").hidden = isLocating;
-  document.querySelector(".js-geo-label").textContent = isLocating ? "Localisation…" : "Utiliser ma position";
-}
-
-function showPlaceMessage(text, type) {
-  const message = document.querySelector("#place-msg");
-  message.textContent = text;
-  message.className = type ? `wu-msg is-${type}` : "wu-msg";
+  $("[data-action='locate']").disabled = isLocating;
+  $(".js-geo-spin").hidden = !isLocating;
+  $(".js-geo-icon").hidden = isLocating;
+  $(".js-geo-label").textContent = isLocating ? "Localisation…" : "Utiliser ma position";
 }
 
 export async function locate() {
-  if (!navigator.geolocation) {
-    showPlaceMessage("La géolocalisation n'est pas disponible. Saisissez votre ville.", "err");
-    return;
-  }
-
   setLocating(true);
-  showPlaceMessage("Localisation en cours…");
+  showMessage("place-msg", "Localisation en cours…", "info");
 
   try {
-    const position = await getPosition();
-    const city = await findCityByPosition(position.coords.latitude, position.coords.longitude);
+    const { coords } = await getPosition();
+    const city = await findCityByPosition(coords.latitude, coords.longitude);
     setCity(city);
-    showPlaceMessage(`Position détectée : ${city.nom}`, "ok");
+    showMessage("place-msg", `Position détectée : ${city.nom}`, "ok");
   } catch (error) {
-    if (error.code === 1) {
-      showPlaceMessage("Accès à votre position refusé. Saisissez votre ville.", "err");
-    } else {
-      showPlaceMessage("Position introuvable. Réessayez ou saisissez votre ville.", "err");
-    }
+    showMessage("place-msg", error.code === 1
+      ? "Accès à votre position refusé. Saisissez votre ville."
+      : "Position introuvable. Réessayez ou saisissez votre ville.");
   }
 
   setLocating(false);
@@ -83,94 +67,75 @@ export async function locate() {
 export function selectWhen(value) {
   answers.when = value;
   updateChoices("when-opts", [value]);
-  showError("when-msg", "");
-  document.querySelector("#date-block").hidden = value !== "date";
+  showMessage("when-msg", "");
+  $("#date-block").hidden = value !== "date";
 }
 
 export function changeDate(date) {
   answers.date = date;
-  showError("date-msg", "");
+  showMessage("date-msg", "");
 }
 
 export function whenNext() {
-  if (!answers.when) {
-    showError("when-msg", "Choisissez une option pour continuer.");
-    return;
-  }
-
-  if (answers.when === "date" && !answers.date) {
-    showError("date-msg", "Choisissez une date pour continuer.");
-    return;
-  }
-
+  if (!answers.when) return showMessage("when-msg", "Choisissez une option pour continuer.");
+  if (answers.when === "date" && !answers.date) return showMessage("date-msg", "Choisissez une date pour continuer.");
   nextStep();
 }
 
 export function toggleCat(value) {
-  if (answers.categories.includes(value)) {
-    answers.categories = answers.categories.filter((category) => category !== value);
-  } else {
-    answers.categories.push(value);
-  }
+  answers.categories = answers.categories.includes(value)
+    ? answers.categories.filter((category) => category !== value)
+    : [...answers.categories, value];
 
   updateChoices("cat-opts", answers.categories);
 
   const count = answers.categories.length;
-  document.querySelector("#what-next-label").textContent = count > 0 ? `Suivant (${count})` : "Tout m'intéresse";
+  $("#what-next-label").textContent = count > 0 ? `Suivant (${count})` : "Tout m'intéresse";
 }
 
 export function whatNext() {
-  document.querySelector("#radius-from").textContent = answers.city.nom;
+  $("#radius-from").textContent = answers.city.nom;
   nextStep();
 }
 
 export function selectRadius(value) {
-  answers.radius = value;
-  updateChoices("radius-opts", [String(value)]);
-  showError("radius-msg", "");
+  answers.radius = Number(value);
+  updateChoices("radius-opts", [value]);
+  showMessage("radius-msg", "");
 }
 
 export function radiusNext() {
-  if (!answers.radius) {
-    showError("radius-msg", "Choisissez une distance pour continuer.");
-    return;
-  }
-
-  console.log("Recherche", answers);
+  if (!answers.radius) return showMessage("radius-msg", "Choisissez une distance pour continuer.");
+  search();
 }
 
-export function back() {
-  previousStep();
+async function search(page = 1) {
+  currentPage = page;
+  showScreen("loading");
+
+  try {
+    renderResults(await fetchEvents(answers, page), answers);
+  } catch (error) {
+    console.error(error);
+    renderError();
+  }
+
+  showScreen("results");
 }
 
 export function widen() {
-  console.log("widen");
+  selectRadius("50");
+  search();
 }
 
-export function editWhen() {
-  console.log("editWhen");
-}
+export const previousPage = () => search(currentPage - 1);
+export const nextPage = () => search(currentPage + 1);
+export const back = () => previousStep();
+export const editWhen = () => showStep(1);
+export const refine = () => showStep(0);
+export const restart = () => location.reload();
 
-export function refine() {
-  console.log("refine");
-}
-
-export function restart() {
-  console.log("restart");
-}
-
-export function scrollTrack(direction) {
-  console.log("scrollTrack", direction);
-}
-
-export function openEvent(id) {
-  console.log("openEvent", id);
-}
-
-export function closeEvent() {
-  console.log("closeEvent");
-}
-
-export function downloadIcs(id) {
-  console.log("downloadIcs", id);
-}
+export const scrollTrack = (direction) => console.log("scrollTrack", direction);
+export const openEvent = (id) => console.log("openEvent", id);
+export const closeEvent = () => console.log("closeEvent");
+export const downloadIcs = (id) => console.log("downloadIcs", id);

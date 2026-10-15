@@ -138,6 +138,17 @@
         <h2 id="res-title" class="wu-qtitle" tabindex="-1"></h2>
         <p id="res-meta" class="wu-qhint"></p>
         <ul id="res-list" class="wu-list" role="list"></ul>
+        <nav id="res-pagination" class="wu-pager" aria-label="Pagination des résultats" hidden>
+          <button type="button" class="wu-btn wu-btn-ico" data-action="page-prev">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>
+            <span class="wu-pager-label">Précédent</span>
+          </button>
+          <p id="res-page" class="wu-pager-txt" aria-live="polite"></p>
+          <button type="button" class="wu-btn wu-btn-ico" data-action="page-next">
+            <span class="wu-pager-label">Suivant</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </nav>
         <div id="res-empty" class="wu-empty" hidden>
           <p><strong>Aucune sortie pour ces critères.</strong></p>
           <p class="wu-sub">Élargissez le rayon ou changez de date.</p>
