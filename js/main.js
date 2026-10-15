@@ -2,7 +2,6 @@ import { getHighlightEvents } from "../js/highlight-events.js";
 import { formatBadgeDate, formatEventRelativeDate } from "../js/utils.js"
 
 const highlightEvents = await getHighlightEvents();
-console.log(highlightEvents[1]);
 
 const highlightList = document.querySelector(".highlight-list")
 for (let i = 0; i < highlightEvents.length; i++) {
