@@ -1,4 +1,6 @@
 import { getHighlightEvents } from "../js/highlight-events.js";
+import { formatBadgeDate, formatEventRelativeDate } from "../js/utils.js"
+
 const highlightEvents = await getHighlightEvents();
 console.log(highlightEvents[1]);
 
@@ -17,10 +19,11 @@ for (let i = 0; i < highlightEvents.length; i++) {
 
     highlightList.appendChild(newEvent);
     newEvent.innerHTML = `
+        <p>${formatBadgeDate(eventStartDate).dayName} ${formatBadgeDate(eventStartDate).dayNumber} ${formatBadgeDate(eventStartDate).monthName}</p>
         <p>${eventLabel}</p>
         <p>${eventType}</p>
         <p>${eventStreetAddress} à ${eventAddressLocality}</p>
-        <p>Début : ${eventStartDate} à ${eventStartTime}</p>
-        <p>Fin : ${eventEndDate} à ${eventEndTime}</p>
+        <p>Début : ${formatEventRelativeDate(eventStartDate, eventStartTime)}</p>
+        <p>Fin : ${formatEventRelativeDate(eventEndDate, eventEndTime)}</p>
     `;
 }
