@@ -1,4 +1,5 @@
 import {
+  initForm,
   submitWhere,
   locate,
   selectWhen,
@@ -126,3 +127,5 @@ document.addEventListener("click", (event) => {
       break;
   }
 });
+
+initForm();

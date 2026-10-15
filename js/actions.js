@@ -1,4 +1,25 @@
 import { getSelectedCity, setCity, findCityByPosition } from "./cities.js";
+import { nextStep, previousStep } from "./steps.js";
+import { WHEN_CHOICES, CATEGORY_CHOICES, RADIUS_CHOICES, renderChoices, updateChoices } from "./choices.js";
+
+const answers = {
+  city: null,
+  when: "",
+  date: "",
+  categories: [],
+  radius: 0
+};
+
+function showError(id, text) {
+  document.querySelector(`#${id}`).textContent = text;
+}
+
+export function initForm() {
+  renderChoices("when-opts", WHEN_CHOICES, "when");
+  renderChoices("cat-opts", CATEGORY_CHOICES, "cat", true);
+  renderChoices("radius-opts", RADIUS_CHOICES, "radius");
+  document.querySelector("#date").min = new Date().toLocaleDateString("fr-CA");
+}
 
 export function submitWhere() {
   const placeInput = document.querySelector("#place");
@@ -11,7 +32,8 @@ export function submitWhere() {
     return;
   }
 
-  console.log("submitWhere", city);
+  answers.city = city;
+  nextStep();
 }
 
 function getPosition() {
@@ -59,35 +81,66 @@ export async function locate() {
 }
 
 export function selectWhen(value) {
-  console.log("selectWhen", value);
+  answers.when = value;
+  updateChoices("when-opts", [value]);
+  showError("when-msg", "");
+  document.querySelector("#date-block").hidden = value !== "date";
 }
 
 export function changeDate(date) {
-  console.log("changeDate", date);
+  answers.date = date;
+  showError("date-msg", "");
 }
 
 export function whenNext() {
-  console.log("whenNext");
+  if (!answers.when) {
+    showError("when-msg", "Choisissez une option pour continuer.");
+    return;
+  }
+
+  if (answers.when === "date" && !answers.date) {
+    showError("date-msg", "Choisissez une date pour continuer.");
+    return;
+  }
+
+  nextStep();
 }
 
 export function toggleCat(value) {
-  console.log("toggleCat", value);
+  if (answers.categories.includes(value)) {
+    answers.categories = answers.categories.filter((category) => category !== value);
+  } else {
+    answers.categories.push(value);
+  }
+
+  updateChoices("cat-opts", answers.categories);
+
+  const count = answers.categories.length;
+  document.querySelector("#what-next-label").textContent = count > 0 ? `Suivant (${count})` : "Tout m'intéresse";
 }
 
 export function whatNext() {
-  console.log("whatNext");
+  document.querySelector("#radius-from").textContent = answers.city.nom;
+  nextStep();
 }
 
 export function selectRadius(value) {
-  console.log("selectRadius", value);
+  answers.radius = value;
+  updateChoices("radius-opts", [String(value)]);
+  showError("radius-msg", "");
 }
 
 export function radiusNext() {
-  console.log("radiusNext");
+  if (!answers.radius) {
+    showError("radius-msg", "Choisissez une distance pour continuer.");
+    return;
+  }
+
+  console.log("Recherche", answers);
 }
 
 export function back() {
-  console.log("back");
+  previousStep();
 }
 
 export function widen() {
