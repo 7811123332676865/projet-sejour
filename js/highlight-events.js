@@ -1,6 +1,6 @@
 export async function getHighlightEvents() {
     const api_key = "8bd12b78-f73f-49b1-a8c7-12aecdf7d4fe";
-    const url = `https://api.datatourisme.fr/v1/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,isLocatedAt,type,isLocatedAt&page_size=100`;
+    const url = `https://api.datatourisme.fr/v1/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,isLocatedAt,type&page_size=100`;
     try {
         const response = await fetch(url, {
             headers: {
