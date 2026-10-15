@@ -1,3 +1,3 @@
-import { getHighlightEvents } from "../js/highlight-events.js";
-// getHighlightEvents();
-console.log(getHighlightEvents());
+import {getHighlightEvents} from "./highlight-events.js";
+
+console.log( await getHighlightEvents());
