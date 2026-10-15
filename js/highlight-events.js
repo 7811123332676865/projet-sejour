@@ -1,10 +1,13 @@
-export async function getHighlightEvents() {
-    const api_key = "8bd12b78-f73f-49b1-a8c7-12aecdf7d4fe";
-    const url = `https://api.datatourisme.fr/v1/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,isLocatedAt,type&page_size=100`;
+import { DATATOURISME_API_KEY } from "./config.js";
+import { shuffleEvents, highlightEventsNb } from "./utils.js";
+
+export default async function fetchHighlightEvents() {
+    const baseUrl = `https://api.datatourisme.fr/v1`
+    const params = `/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,isLocatedAt,type&page_size=100`;
     try {
-        const response = await fetch(url, {
+        const response = await fetch((baseUrl + params), {
             headers: {
-                "X-API-Key": api_key,
+                "X-API-Key": DATATOURISME_API_KEY,
             }
         });
         if (!response.ok) {
@@ -16,18 +19,11 @@ export async function getHighlightEvents() {
 
         if (!eventList || eventList.length === 0) return [];
 
-        if (eventList.length <= 3) {
+        if (eventList.length <= highlightEventsNb) {
             return [...eventList];
         }
 
-        // Copie et mélange partiel (algorithme Fisher-Yates)
-        const shuffledEvents = [...eventList];
-        for (let i = 0; i < 3; i++) {
-            const j = Math.floor(Math.random() * (shuffledEvents.length - i)) + i;
-            [shuffledEvents[i], shuffledEvents[j]] = [shuffledEvents[j], shuffledEvents[i]];
-        }
-
-        return shuffledEvents.slice(0, 3);
+        return shuffleEvents([...eventList]);
 
     } catch (erreur) {
         console.error(erreur.message);

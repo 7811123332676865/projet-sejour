@@ -1,3 +1,5 @@
+export const highlightEventsNb = 5 ;
+
 export function formatBadgeDate(date) {
     const formatter = new Intl.DateTimeFormat('fr-FR', {
         weekday: 'short',
@@ -42,3 +44,12 @@ export function formatEventRelativeDate(eventDate, eventHour) {
         return formattedDate + " - " + eventHour;
     }
 }
+
+export function shuffleEvents(events) {
+    for (let i = 0; i < highlightEventsNb; i++) {
+            const j = Math.floor(Math.random() * (events.length - i)) + i;
+            [events[i], events[j]] = [events[j], events[i]];
+        }
+
+        return events.slice(0, highlightEventsNb);
+};
