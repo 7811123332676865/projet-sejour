@@ -62,7 +62,7 @@ actions.initForm();
 
 const highlightEvents = await fetchHighlightEvents();
 
-const highlightList = document.querySelector(".highlight-list")
+const highlightList = document.querySelector(".wu-track")
 for (let i = 0; i < highlightEvents.length; i++) {
 
     const newEvent = document.createElement("li");
