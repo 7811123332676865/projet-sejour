@@ -7,6 +7,14 @@ export function addDays(days) {
 }
 
 export const toIsoDate = (date) => date.toLocaleDateString("fr-CA");
+
+export function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+export const formatDate = (isoDate, options) => new Date(`${isoDate}T12:00`).toLocaleDateString("fr-FR", options);
 export const highlightEventsNb = 5 ;
 
 export function formatBadgeDate(date) {

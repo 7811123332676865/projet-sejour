@@ -3,7 +3,7 @@ import { shuffleEvents, highlightEventsNb } from "./utils.js";
 
 export default async function fetchHighlightEvents() {
     const baseUrl = `https://api.datatourisme.fr/v1`
-    const params = `/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,isLocatedAt,type&page_size=100`;
+    const params = `/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,isLocatedAt,type,hasDescription&page_size=100`;
     try {
         const response = await fetch((baseUrl + params), {
             headers: {

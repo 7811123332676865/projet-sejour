@@ -443,6 +443,7 @@ body {
    `order` les replace visuellement : bandeau (date + type), perforation, corps. */
 .wu-feat .wu-track > li {
   --tk: var(--accent);
+  position: relative;
   flex-direction: column;
   padding-bottom: 16px;
   background: var(--card);
@@ -453,6 +454,8 @@ body {
   transition: border-color .15s;
 }
 .wu-feat .wu-track > li:hover { border-color: var(--edge); }
+.wu-feat .wu-track > li:hover .wu-link { text-decoration: underline; text-underline-offset: 3px; }
+.wu-feat .wu-track > li:has(.wu-link:focus-visible) { outline: 3px solid var(--accent); outline-offset: 2px; }
 .wu-feat .wu-track > li:nth-child(5n+1) { --tk: #4d6a1f; }
 .wu-feat .wu-track > li:nth-child(5n+2) { --tk: #0f766e; }
 .wu-feat .wu-track > li:nth-child(5n+3) { --tk: #1d4ed8; }
