@@ -48,6 +48,7 @@ function getCategory(types, chosenCategories) {
 function toEvent(item, period, city, categories) {
   const [cityLon, cityLat] = city.centre.coordinates;
   const place = item.isLocatedAt?.[0];
+  const address = place?.address?.[0];
 
   const dates = item.takesPlaceAt ?? [];
   const matchingDate = dates
@@ -62,7 +63,9 @@ function toEvent(item, period, city, categories) {
     startDate: matchingDate.startDate < period.start ? period.start : matchingDate.startDate,
     endDate: matchingDate.endDate,
     startTime: matchingDate.startTime ?? "",
-    town: place?.address?.[0]?.addressLocality ?? "",
+    town: address?.addressLocality ?? "",
+    address: [address?.streetAddress, address?.postalCode, address?.addressLocality].flat().filter(Boolean).join(" "),
+    geo: place?.geo ? { lat: place.geo.latitude, lon: place.geo.longitude } : null,
     distance: place?.geo ? Math.round(getDistance(cityLat, cityLon, place.geo.latitude, place.geo.longitude)) : null
   };
 }

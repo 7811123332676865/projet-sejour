@@ -3,10 +3,11 @@ import { getSelectedCity, setCity, findCityByPosition } from "./cities.js";
 import { nextStep, previousStep, showStep, showScreen } from "./steps.js";
 import { WHEN_CHOICES, CATEGORY_CHOICES, RADIUS_CHOICES, renderChoices, updateChoices } from "./choices.js";
 import { fetchEvents } from "./events.js";
-import { renderResults, renderError } from "./results.js";
+import { renderResults, renderError, renderEventModal } from "./results.js";
 
 const answers = { city: null, when: "", date: "", categories: [], radius: 0 };
 let currentPage = 1;
+let currentEvents = [];
 
 function showMessage(id, text, type = "err") {
   const message = $(`#${id}`);
@@ -116,7 +117,9 @@ async function search(page = 1) {
   showScreen("loading");
 
   try {
-    renderResults(await fetchEvents(answers, page), answers);
+    const results = await fetchEvents(answers, page);
+    currentEvents = results.events;
+    renderResults(results, answers);
   } catch (error) {
     console.error(error);
     renderError();
@@ -138,6 +141,56 @@ export const refine = () => showStep(0);
 export const restart = () => location.reload();
 
 export const scrollTrack = (direction) => console.log("scrollTrack", direction);
-export const openEvent = (id) => console.log("openEvent", id);
-export const closeEvent = () => console.log("closeEvent");
-export const downloadIcs = (id) => console.log("downloadIcs", id);
+
+const findEvent = (id) => currentEvents.find((event) => event.id === id);
+
+export function openEvent(id) {
+  const event = findEvent(id);
+  if (!event) return;
+
+  renderEventModal(event);
+  $("#ev-modal").showModal();
+}
+
+export const closeEvent = () => $("#ev-modal").close();
+
+const escapeIcs = (text) => text.replace(/[\\,;]/g, "\\$&").replace(/\n/g, "\\n");
+const toIcsDate = (isoDate) => isoDate.replaceAll("-", "");
+
+function getIcsDates(event) {
+  if (event.startTime) {
+    const [hours, minutes] = event.startTime.split(":");
+    return [`DTSTART:${toIcsDate(event.startDate)}T${hours}${minutes}00`];
+  }
+
+  const end = new Date(`${event.endDate || event.startDate}T12:00`);
+  end.setDate(end.getDate() + 1);
+  return [`DTSTART;VALUE=DATE:${toIcsDate(event.startDate)}`, `DTEND;VALUE=DATE:${toIcsDate(toIsoDate(end))}`];
+}
+
+export function downloadIcs(id) {
+  const event = findEvent(id);
+  if (!event) return;
+
+  const lines = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//What's up ?!//FR",
+    "BEGIN:VEVENT",
+    `UID:${event.id}@whatsup`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z`,
+    ...getIcsDates(event),
+    `SUMMARY:${escapeIcs(event.title)}`,
+    event.description && `DESCRIPTION:${escapeIcs(event.description)}`,
+    (event.address || event.town) && `LOCATION:${escapeIcs(event.address || event.town)}`,
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].filter(Boolean);
+
+  const url = URL.createObjectURL(new Blob([lines.join("\r\n")], { type: "text/calendar" }));
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = `${event.title.replace(/[^\p{L}\p{N}]+/gu, "-").toLowerCase()}.ics`;
+  link.click();
+  URL.revokeObjectURL(url);
+}
