@@ -137,7 +137,25 @@ export const editWhen = () => showStep(1);
 export const refine = () => showStep(0);
 export const restart = () => location.reload();
 
-export const scrollTrack = (direction) => console.log("scrollTrack", direction);
+export function updateTrackNav() {
+  const track = $("#feat-track");
+  const maxScroll = track.scrollWidth - track.clientWidth;
+  $("[data-action='prev']").setAttribute("aria-disabled", track.scrollLeft <= 1);
+  $("[data-action='next']").setAttribute("aria-disabled", track.scrollLeft >= maxScroll - 1);
+}
+
+// Fait défiler d'une "page" de cartes visibles (au moins une carte)
+export function scrollTrack(direction) {
+  const track = $("#feat-track");
+  const card = track.firstElementChild;
+  if (!card) return;
+
+  const cardStep = card.offsetWidth + (parseFloat(getComputedStyle(track).columnGap) || 0);
+  const visibleCards = Math.max(1, Math.floor(track.clientWidth / cardStep));
+  const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  track.scrollBy({ left: direction * visibleCards * cardStep, behavior: reduceMotion ? "auto" : "smooth" });
+}
 export const openEvent = (id) => console.log("openEvent", id);
 export const closeEvent = () => console.log("closeEvent");
 export const downloadIcs = (id) => console.log("downloadIcs", id);

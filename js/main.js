@@ -60,6 +60,9 @@ document.addEventListener("click", (event) => {
 
 actions.initForm();
 
+$("#feat-track").addEventListener("scroll", actions.updateTrackNav, { passive: true });
+addEventListener("resize", actions.updateTrackNav);
+
 const highlightEvents = await fetchHighlightEvents();
 
 const highlightList = document.querySelector(".wu-track")
@@ -92,3 +95,5 @@ for (let i = 0; i < highlightEvents.length; i++) {
     newEvent.append(dateP, labelP, typeP, addressP, startP, endP);
     highlightList.appendChild(newEvent);
 }
+
+actions.updateTrackNav();
