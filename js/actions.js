@@ -19,6 +19,9 @@ export function initForm() {
   renderChoices("cat-opts", CATEGORY_CHOICES, "cat", true);
   renderChoices("radius-opts", RADIUS_CHOICES, "radius");
   $("#date").min = toIsoDate(new Date());
+
+  selectWhen("weekend");
+  selectRadius("5");
 }
 
 export function submitWhere() {
