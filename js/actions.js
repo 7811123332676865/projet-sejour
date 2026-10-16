@@ -159,6 +159,4 @@ export function scrollTrack(direction) {
 
   track.scrollBy({ left: direction * visibleCards * cardStep, behavior: reduceMotion ? "auto" : "smooth" });
 }
-export const openEvent = (id) => console.log("openEvent", id);
-export const closeEvent = () => console.log("closeEvent");
-export const downloadIcs = (id) => console.log("downloadIcs", id);
+export { openEvent, closeEvent, downloadIcs } from "./modal.js";

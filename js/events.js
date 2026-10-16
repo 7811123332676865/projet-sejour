@@ -40,7 +40,7 @@ function getDistance(lat1, lon1, lat2, lon2) {
   return 6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 }
 
-function getCategory(types, chosenCategories) {
+export function getCategory(types, chosenCategories) {
   const order = [...chosenCategories, ...Object.keys(CATEGORY_TYPES)];
   return order.find((key) => CATEGORY_TYPES[key].some((type) => types.includes(type))) ?? "autre";
 }
@@ -62,6 +62,8 @@ function toEvent(item, period, city, categories) {
     startDate: matchingDate.startDate < period.start ? period.start : matchingDate.startDate,
     endDate: matchingDate.endDate,
     startTime: matchingDate.startTime ?? "",
+    endTime: matchingDate.endTime ?? "",
+    address: place?.address?.[0]?.streetAddress?.[0] ?? "",
     town: place?.address?.[0]?.addressLocality ?? "",
     distance: place?.geo ? Math.round(getDistance(cityLat, cityLon, place.geo.latitude, place.geo.longitude)) : null
   };

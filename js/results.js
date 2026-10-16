@@ -1,14 +1,7 @@
-import { $ } from "./utils.js";
+import { $, escapeHtml, formatDate } from "./utils.js";
 import { CATEGORY_LABELS } from "./events.js";
 import { CATEGORY_CHOICES } from "./choices.js";
-
-function escapeHtml(text) {
-  const div = document.createElement("div");
-  div.textContent = text;
-  return div.innerHTML;
-}
-
-const formatDate = (isoDate, options) => new Date(`${isoDate}T12:00`).toLocaleDateString("fr-FR", options);
+import { registerEvents } from "./modal.js";
 
 function formatWhen(event) {
   if (event.endDate && event.endDate !== event.startDate) {
@@ -45,6 +38,7 @@ export function renderResults({ events, total, page, totalPages }, answers) {
   $("#res-title").textContent = `${total || "Aucune"} sortie${total > 1 ? "s" : ""} autour de ${answers.city.nom}`;
   $("#res-meta").textContent = `${categoryNames.join(", ") || "Tout m'intéresse"}, ${answers.radius} km`;
 
+  registerEvents(events);
   $("#res-list").innerHTML = events.map(createEventRow).join("");
   $("#res-list").hidden = total === 0;
   $("#res-empty").hidden = total > 0;

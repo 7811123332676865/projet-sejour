@@ -3,6 +3,8 @@ import * as actions from "./actions.js";
 import { searchCities, onPlaceKeydown, selectCity, closeCities } from "./cities.js";
 import fetchHighlightEvents from "../js/highlight-events.js";
 import { formatBadgeDate, formatEventRelativeDate } from "../js/utils.js"
+import { getCategory } from "./events.js";
+import { registerEvents } from "./modal.js";
 
 const placeInput = $("#place");
 const modal = $("#ev-modal");
@@ -82,7 +84,13 @@ for (let i = 0; i < highlightEvents.length; i++) {
     const dateParagraph = document.createElement("p");
     dateParagraph.textContent = `${startDateBadge.dayName} ${startDateBadge.dayNumber} ${startDateBadge.monthName}`;
     const labelParagraph = document.createElement("p");
-    labelParagraph.textContent = eventLabel;
+    const labelLink = document.createElement("a");
+    labelLink.className = "wu-link";
+    labelLink.href = "#";
+    labelLink.dataset.event = highlightEvents[i].uuid;
+    labelLink.setAttribute("aria-haspopup", "dialog");
+    labelLink.textContent = eventLabel;
+    labelParagraph.append(labelLink);
     const typeParagraph = document.createElement("p");
     typeParagraph.textContent = eventType;
     const addressParagraph = document.createElement("p");
@@ -94,6 +102,22 @@ for (let i = 0; i < highlightEvents.length; i++) {
 
     newEvent.append(dateParagraph, labelParagraph, typeParagraph, addressParagraph, startParagraph, endParagraph);
     highlightList.appendChild(newEvent);
+
+    const eventDate = highlightEvents[i]?.takesPlaceAt?.[0] ?? {};
+    const eventAddress = highlightEvents[i]?.isLocatedAt?.[0]?.address?.[0] ?? {};
+    registerEvents([{
+        id: highlightEvents[i].uuid,
+        title: eventLabel,
+        category: getCategory(highlightEvents[i]?.type ?? [], []),
+        description: highlightEvents[i]?.hasDescription?.[0]?.shortDescription?.["@fr"] ?? "",
+        startDate: eventDate.startDate,
+        endDate: eventDate.endDate,
+        startTime: eventDate.startTime ?? "",
+        endTime: eventDate.endTime ?? "",
+        address: eventAddress.streetAddress?.[0] ?? "",
+        town: eventAddress.addressLocality ?? "",
+        distance: null
+    }]);
 }
 
 actions.updateTrackNav();
