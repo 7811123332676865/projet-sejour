@@ -78,7 +78,9 @@ export function changeDate(date) {
 
 export function whenNext() {
   if (!answers.when) return showMessage("when-msg", "Choisissez une option pour continuer.");
-  if (answers.when === "date" && !answers.date) return showMessage("date-msg", "Choisissez une date pour continuer.");
+  if (answers.when === "date" && (!answers.date || !$("#date").checkValidity())) {
+    return showMessage("date-msg", "Choisissez une date valide à partir d'aujourd'hui pour continuer.");
+  }
   nextStep();
 }
 
