@@ -2,7 +2,7 @@
  
 // ---------- 1. RÉGLAGES ----------
  
-const API_URL = "https://api.datatourisme.fr/v1/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,isLocatedAt&page_size=100";
+const API_URL = "https://api.datatourisme.fr/v1/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,hasDescription,isLocatedAt&page_size=100";
 const API_KEY = "a1eaf35f-0c38-4fd4-8826-2aae9ab316ac";
  
  

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test événements DataTourisme</title>
+<style>
+  :root { --bg:#f6f7f4; --card:#fff; --text:#1f2a24; --muted:#66716b; --accent:#2f6f5e; --line:#dde2dc; --warn:#a4512a; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg:#161a18; --card:#1f2522; --text:#e8ece9; --muted:#9aa5a0; --accent:#6fc2aa; --line:#323a36; --warn:#e8a070; }
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; padding:1.5rem 1rem 3rem; background:var(--bg); color:var(--text); font-family:Georgia, serif; }
+  .wrap { max-width:1000px; margin:0 auto; }
+  h1 { margin:0 0 1rem; font-size:1.8rem; }
+  .bar { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; margin-bottom:.6rem; }
+  .bar input[type=text] { flex:1; min-width:220px; padding:.5rem; border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--text); }
+  button { padding:.5rem .9rem; border:1px solid var(--accent); background:var(--accent); color:var(--bg); border-radius:6px; cursor:pointer; font-family:inherit; }
+  button.alt { background:transparent; color:var(--accent); }
+  #status { color:var(--muted); margin:.4rem 0 1rem; font-size:.95rem; }
+  #status.error { color:var(--warn); }
+  details { margin-bottom:1rem; }
+  pre { max-height:260px; overflow:auto; background:var(--card); border:1px solid var(--line); padding:.7rem; font-size:.8rem; }
+  .objects { display:grid; gap:1rem; grid-template-columns:repeat(auto-fill, minmax(270px, 1fr)); }
+  .event { background:var(--card); border:1px solid var(--line); border-radius:10px; overflow:hidden; display:flex; flex-direction:column; }
+  .event.is-hidden { display:none; }
+  .event img { width:100%; height:150px; object-fit:cover; }
+  .eventBody { padding:1rem; display:flex; flex-direction:column; gap:.45rem; flex:1; }
+  .dateTime { color:var(--accent); font-weight:bold; font-size:.9rem; }
+  .eventType { margin:0; font-size:.95rem; font-weight:normal; color:var(--muted); }
+  .eventTitle { margin:0; font-size:1.2rem; line-height:1.25; }
+  .descriptif { margin:0; line-height:1.45; }
+  .eventAddress { margin:0; color:var(--muted); font-size:.9rem; flex:1; }
+  .maps { color:var(--accent); font-size:.9rem; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Test événements DataTourisme</h1>
+
+  <div class="bar">
+    <input type="text" id="apiKey" placeholder="Clé API DataTourisme (en-tête X-API-Key)">
+    <button id="btnApi">Charger l'API</button>
+    <button id="btnDemo" class="alt">Données de démo</button>
+    <label><input type="checkbox" id="showPast"> afficher les événements passés</label>
+  </div>
+  <div id="status">Clique sur « Données de démo » pour voir le rendu, ou renseigne ta clé pour appeler l'API.</div>
+  <details><summary>JSON brut reçu (pour vérifier les noms de champs)</summary><pre id="raw">—</pre></details>
+
+  <section class="objects"></section>
+</div>
+
+<script>
+// ======================= TON SCRIPT, CORRIGÉ =======================
+const API_URL = "https://api.datatourisme.fr/v1/entertainmentAndEvent?department=37&fields=uuid,label,takesPlaceAt,isLocatedAt&page_size=100";
+const eventList = document.querySelector(".objects");
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+let currentEvents = [];
+
+// ---- outils : l'API renvoie des tableaux / objets imbriqués, on les "aplatit" ----
+function text(v) {
+  if (v == null) return "";
+  if (Array.isArray(v)) return text(v[0]);
+  if (typeof v === "object") {
+    if ("@value" in v) return text(v["@value"]);
+    if ("fr" in v) return text(v.fr);
+    const k = Object.keys(v)[0];
+    return k ? text(v[k]) : "";
+  }
+  return String(v);
+}
+// cherche une clé n'importe où dans l'objet (ex: "streetAddress")
+function deepFind(o, key) {
+  if (o == null || typeof o !== "object") return undefined;
+  if (key in o) return o[key];
+  for (const v of Object.values(o)) {
+    const r = deepFind(v, key);
+    if (r !== undefined) return r;
+  }
+  return undefined;
+}
+function createEl(tag, className, content) {
+  const el = document.createElement(tag);
+  if (className) el.className = className;
+  if (content !== undefined) el.textContent = content;
+  return el;
+}
+function fmtDate(s) {
+  const d = new Date(s);
+  return isNaN(d) ? s : d.toLocaleDateString("fr-FR", { dateStyle: "long" });
+}
+
+// ---- un objet de l'API  →  un objet simple ----
+function normalize(o) {
+  return {
+    id: text(o.uuid),
+    title: text(o.label),
+    start: text(deepFind(o.takesPlaceAt, "startDate")),
+    end: text(deepFind(o.takesPlaceAt, "endDate")),
+    street: text(deepFind(o.isLocatedAt, "streetAddress")),
+    city: text(deepFind(o.isLocatedAt, "addressLocality")),
+    description: text(deepFind(o, "shortDescription")), // si tu l'ajoutes dans fields=
+    image: text(deepFind(o, "locator")),                 // idem
+    credits: text(deepFind(o, "credits"))
+  };
+}
+
+// ---- affichage ----
+function renderEvents(list) {
+  currentEvents = list;
+  eventList.textContent = "";
+  const showPast = document.getElementById("showPast").checked;
+
+  for (const raw of list) {
+    const item = normalize(raw);
+    const event = createEl("div", "event");
+
+    // masquer si l'événement est terminé (fin < aujourd'hui)
+    const last = new Date(item.end || item.start);
+    if (!isNaN(last) && last < today && !showPast) {
+      event.classList.add("is-hidden");
+    }
+
+    const body = createEl("div", "eventBody");
+
+    if (item.image) {
+      const img = document.createElement("img");
+      img.src = item.image;
+      img.alt = item.credits || item.title;
+      event.appendChild(img);
+    }
+
+    const dateText = item.end && item.end !== item.start
+      ? fmtDate(item.start) + " → " + fmtDate(item.end)
+      : fmtDate(item.start);
+    const time = createEl("time", "dateTime", dateText);
+    time.dateTime = item.start;
+
+    const eventType = createEl("h3", "eventType", item.city ? "#" + item.city : "");
+    const eventTitle = createEl("h2", "eventTitle", item.title);
+    body.append(time, eventType, eventTitle);
+
+    if (item.description) body.appendChild(createEl("p", "descriptif", item.description));
+
+    body.appendChild(createEl("p", "eventAddress", item.street));
+
+    const maps = createEl("a", "maps", "Voir sur la carte");
+    maps.href = "https://www.google.com/maps/search/?api=1&query=" +
+      encodeURIComponent(item.street + " " + item.city);
+    maps.target = "_blank";
+    maps.rel = "noopener";
+    body.appendChild(maps);
+
+    event.appendChild(body);
+    eventList.appendChild(event);
+  }
+}
+
+async function getEvents() {
+  const status = document.getElementById("status");
+  const key = document.getElementById("apiKey").value.trim();
+  status.className = "";
+  status.textContent = "Chargement…";
+  try {
+    const response = await fetch(API_URL, { headers: { "X-API-Key": key } });
+    if (!response.ok) throw new Error("Erreur API : " + response.status);
+    const data = await response.json();
+    document.getElementById("raw").textContent = JSON.stringify(data, null, 2).slice(0, 6000);
+    const list = data.objects || data; // l'API range les résultats dans "objects"
+    renderEvents(list);
+    status.textContent = list.length + " événement(s) reçu(s).";
+  } catch (error) {
+    console.error(error);
+    status.className = "error";
+    status.textContent = "Impossible de charger les événements (" + error.message +
+      "). Vérifie la clé, l'URL, et le CORS dans la console.";
+  }
+}
+
+// ======================= DONNÉES DE DÉMO (forme DataTourisme) =======================
+const demo = [
+  { uuid: "d1", label: { fr: ["Festival de la Loire à Tours"] },
+    takesPlaceAt: [{ startDate: "2026-10-23", endDate: "2026-10-25" }],
+    isLocatedAt: [{ address: [{ streetAddress: ["Quai Paul Bert"], addressLocality: "Tours" }] }],
+    shortDescription: { fr: ["Trois jours de concerts et de spectacles au bord du fleuve."] } },
+  { uuid: "d2", label: { fr: ["Marché de Noël"] },
+    takesPlaceAt: [{ startDate: "2026-12-05T10:00:00", endDate: "2026-12-20T19:00:00" }],
+    isLocatedAt: [{ address: [{ streetAddress: ["Place Plumereau"], addressLocality: "Tours" }] }] },
+  { uuid: "d3", label: { fr: ["Visite du château d'Amboise"] },
+    takesPlaceAt: [{ startDate: "2026-11-14" }],
+    isLocatedAt: [{ address: [{ streetAddress: ["Rue de la Concorde"], addressLocality: "Amboise" }] }] },
+  { uuid: "d4", label: { fr: ["Fête de la science (passée)"] },
+    takesPlaceAt: [{ startDate: "2026-09-10", endDate: "2026-09-12" }],
+    isLocatedAt: [{ address: [{ streetAddress: ["Avenue Monge"], addressLocality: "Tours" }] }] }
+];
+
+document.getElementById("btnApi").addEventListener("click", getEvents);
+document.getElementById("btnDemo").addEventListener("click", () => {
+  document.getElementById("raw").textContent = JSON.stringify(demo, null, 2);
+  document.getElementById("status").className = "";
+  document.getElementById("status").textContent = "Mode démo : " + demo.length + " événements (1 passé, masqué).";
+  renderEvents(demo);
+});
+document.getElementById("showPast").addEventListener("change", () => renderEvents(currentEvents));
+</script>
+</body>
+</html>
