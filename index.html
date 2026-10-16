@@ -1,14 +1,208 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>What's Up?!</title>
-  <script type="module" src="./js/main.js"></script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What's up ?! — Trouver une sortie</title>
+<meta name="description" content="Concerts, expos, vide-greniers, fêtes locales et after-work autour de vous.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&family=League+Spartan:wght@600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script type="module" src="./js/main.js"></script>
 </head>
 <body>
-  <section class="highlight-section">
-    <ul class="highlight-list"></ul>
+
+<div class="wu-top">
+  <header class="wu-hero">
+    <img class="wu-hero-bg" src="concert.jpg" alt="">
+    <svg class="wu-logo" role="img" aria-label="What's up ?!" viewBox="0 0 300 250">
+      <g fill="none" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+        <g transform="translate(78 26) rotate(-36 110 55)" stroke="#FBF4E6">
+          <path d="M0 0H220V41A14 14 0 0 0 220 69V110H0V69A14 14 0 0 0 0 41Z"/>
+          <line x1="170" y1="16" x2="170" y2="94" stroke-dasharray="12 12"/>
+        </g>
+        <g transform="translate(38 104) rotate(-20 110 55)">
+          <path d="M0 0H220V41A14 14 0 0 0 220 69V110H0V69A14 14 0 0 0 0 41Z" fill="#FBF4E6" stroke="#FBF4E6"/>
+          <line x1="172" y1="16" x2="172" y2="94" stroke="#1F1A16" stroke-width="6" stroke-dasharray="10 10"/>
+          <text x="86" y="50" text-anchor="middle" fill="#1F1A16" font-family="League Spartan, sans-serif" font-weight="800" font-size="38">What's</text>
+          <text x="86" y="92" text-anchor="middle" fill="#1F1A16" font-family="League Spartan, sans-serif" font-weight="800" font-size="38">up ?!</text>
+        </g>
+      </g>
+    </svg>
+    <div>
+      <h1 class="wu-h1">Que faire autour de vous ?</h1>
+      <p class="wu-kicker">Quatre questions, et on vous trouve la sortie qui vous ressemble.</p>
+    </div>
+  </header>
+
+  <section class="wu-panel" aria-label="Recherche guidée">
+    <div class="wu-panel-in">
+
+      <div id="progress" class="wu-progress">
+        <p class="wu-steptxt">Étape <span id="step-num">1</span> sur 4</p>
+        <div class="wu-bars" aria-hidden="true">
+          <span class="wu-bar is-on"></span><span class="wu-bar"></span><span class="wu-bar"></span><span class="wu-bar"></span>
+        </div>
+      </div>
+
+      <!-- 1. Où -->
+      <form id="step-where" class="wu-q" role="search" novalidate>
+        <h2 id="q-where" class="wu-qtitle" tabindex="-1">Où êtes-vous ?</h2>
+        <p class="wu-qhint">On cherchera les sorties autour de ce point.</p>
+        <label class="wu-label" for="place">Votre ville</label>
+        <div class="wu-combo">
+          <input id="place" name="city-search" type="search" class="wu-input" autocomplete="off" spellcheck="false" placeholder="Ex. : Tours ou 37000" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="city-list" aria-invalid="false" aria-describedby="place-msg">
+          <ul id="city-list" class="wu-combo-list" role="listbox" aria-label="Villes suggérées" hidden></ul>
+        </div>
+        <button type="button" class="wu-locate" data-action="locate">
+          <svg class="wu-spin js-geo-spin" hidden width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" stroke-opacity=".3"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>
+          <svg class="js-geo-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>
+          <span class="js-geo-label">Utiliser ma position</span>
+        </button>
+        <p id="place-msg" class="wu-msg" aria-live="polite"></p>
+        <div class="wu-navrow">
+          <button type="button" id="cancel-where" class="wu-back" data-action="back" hidden>Annuler</button>
+          <button type="submit" class="wu-next js-where-submit">
+            <span>Suivant</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </form>
+
+      <!-- 2. Quand -->
+      <div id="step-when" class="wu-q" hidden>
+        <h2 id="q-when" class="wu-qtitle" tabindex="-1">Quand voulez-vous sortir ?</h2>
+        <p class="wu-qhint">Un seul choix possible.</p>
+        <div id="when-opts" class="wu-opts" role="group" aria-labelledby="q-when" aria-describedby="when-msg"></div>
+        <p id="when-msg" class="wu-msg is-err" aria-live="polite"></p>
+        <div id="date-block" class="wu-date" hidden>
+          <label class="wu-label" for="date">Date de sortie</label>
+          <input id="date" type="date" class="wu-input" aria-invalid="false" aria-describedby="date-msg">
+          <p id="date-msg" class="wu-msg is-err" aria-live="polite"></p>
+        </div>
+        <div class="wu-navrow">
+          <button type="button" class="wu-back" data-action="back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>
+            <span class="js-back-label">Retour</span>
+          </button>
+          <button type="button" class="wu-next" data-action="when-next">
+            <span>Suivant</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 3. Quoi -->
+      <div id="step-what" class="wu-q" hidden>
+        <h2 id="q-what" class="wu-qtitle" tabindex="-1">Qu'est-ce qui vous tente ?</h2>
+        <p class="wu-qhint">Plusieurs choix possibles.</p>
+        <div id="cat-opts" class="wu-opts" role="group" aria-labelledby="q-what"></div>
+        <div class="wu-navrow">
+          <button type="button" class="wu-back" data-action="back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>
+            <span class="js-back-label">Retour</span>
+          </button>
+          <button type="button" class="wu-next" data-action="what-next">
+            <span id="what-next-label">Tout m'intéresse</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4. Rayon -->
+      <div id="step-radius" class="wu-q" hidden>
+        <h2 id="q-radius" class="wu-qtitle" tabindex="-1">Jusqu'où êtes-vous prêt à aller ?</h2>
+        <p class="wu-qhint">Distance maximale depuis <span id="radius-from"></span>.</p>
+        <div id="radius-opts" class="wu-opts" role="group" aria-labelledby="q-radius" aria-describedby="radius-msg"></div>
+        <p id="radius-msg" class="wu-msg is-err" aria-live="polite"></p>
+        <div class="wu-navrow">
+          <button type="button" class="wu-back" data-action="back">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>
+            <span class="js-back-label">Retour</span>
+          </button>
+          <button type="button" class="wu-next" data-action="radius-next">
+            <span>Suivant</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M4 12h15M13 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chargement -->
+      <div id="step-loading" class="wu-loading" role="status" hidden>
+        <svg class="wu-spin" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" stroke-opacity=".2"/><path d="M21 12a9 9 0 0 0-9-9"/></svg>
+        <p>On cherche vos sorties…</p>
+      </div>
+
+      <!-- Résultats -->
+      <section id="step-results" class="wu-q" aria-labelledby="res-title" hidden>
+        <h2 id="res-title" class="wu-qtitle" tabindex="-1"></h2>
+        <p id="res-meta" class="wu-qhint"></p>
+        <ul id="res-list" class="wu-list" role="list"></ul>
+        <nav id="res-pagination" class="wu-pager" aria-label="Pagination des résultats" hidden>
+          <button type="button" class="wu-btn wu-btn-ico" data-action="page-prev">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>
+            <span class="wu-pager-label">Précédent</span>
+          </button>
+          <p id="res-page" class="wu-pager-txt" aria-live="polite"></p>
+          <button type="button" class="wu-btn wu-btn-ico" data-action="page-next">
+            <span class="wu-pager-label">Suivant</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </nav>
+        <div id="res-empty" class="wu-empty" hidden>
+          <p><strong>Aucune sortie pour ces critères.</strong></p>
+          <p class="wu-sub">Élargissez le rayon ou changez de date.</p>
+          <div class="wu-actions">
+            <button type="button" id="widen" class="wu-btn" data-action="widen">Passer à 50 km</button>
+            <button type="button" class="wu-btn" data-action="edit-when">Changer de date</button>
+          </div>
+        </div>
+        <div class="wu-navrow">
+          <button type="button" class="wu-back" data-action="refine">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>
+            <span>Modifier la recherche</span>
+          </button>
+          <button type="button" class="wu-back" data-action="restart">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+            <span>Nouvelle recherche</span>
+          </button>
+        </div>
+      </section>
+
+    </div>
   </section>
+</div>
+
+<main>
+  <section class="wu-section" aria-roledescription="carrousel" aria-labelledby="feat-title">
+    <div class="wu-wrap">
+      <div class="wu-head">
+        <div>
+          <h2 id="feat-title" class="wu-h2">À la une</h2>
+          <p class="wu-sub">Les temps forts de la semaine</p>
+        </div>
+        <div class="wu-ctrls">
+          <button type="button" class="wu-nav" data-action="prev" aria-controls="feat-track" aria-label="Événements précédents" aria-disabled="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 6l-6 6 6 6"/></svg>
+          </button>
+          <button type="button" class="wu-nav" data-action="next" aria-controls="feat-track" aria-label="Événements suivants" aria-disabled="false">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M9 6l6 6-6 6"/></svg>
+          </button>
+        </div>
+      </div>
+      <ul id="feat-track" class="wu-track" role="list"></ul>
+      <div id="feat-dots" class="wu-dots" aria-hidden="true"></div>
+    </div>
+  </section>
+  <div class="wu-end"></div>
+</main>
+
+<dialog id="ev-modal" class="wu-modal" aria-labelledby="modal-title">
+  <div id="modal-body" class="wu-modal-in"></div>
+</dialog>
+
+<script type="module" src="js/main.js"></script>
+
 </body>
 </html>
