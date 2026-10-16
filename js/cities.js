@@ -42,7 +42,7 @@ async function fetchCities(query) {
   try {
     const response = await fetch(`${API_URL}?${param}=${encodeURIComponent(query)}&${FIELDS}&boost=population&limit=6`);
     const result = await response.json();
-    if (placeInput.value.trim() !== query) return;
+    if (placeInput.value.trim() !== query || document.activeElement !== placeInput) return;
 
     cities = result.filter((city) => city.departement && city.codesPostaux.length > 0);
     renderCities();
