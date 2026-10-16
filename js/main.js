@@ -78,21 +78,21 @@ for (let i = 0; i < highlightEvents.length; i++) {
     const eventEndDate = highlightEvents[i]?.takesPlaceAt?.[0]?.endDate ?? "Date fin";
     const eventEndTime = highlightEvents[i]?.takesPlaceAt?.[0]?.endTime ?? "Horaire fin";
 
-    const badgeDate = formatBadgeDate(eventStartDate);
-    const dateP = document.createElement("p");
-    dateP.textContent = `${badgeDate.dayName} ${badgeDate.dayNumber} ${badgeDate.monthName}`;
-    const labelP = document.createElement("p");
-    labelP.textContent = eventLabel;
-    const typeP = document.createElement("p");
-    typeP.textContent = eventType;
-    const addressP = document.createElement("p");
-    addressP.textContent = `${eventStreetAddress} à ${eventAddressLocality}`;
-    const startP = document.createElement("p");
-    startP.textContent = `Début : ${formatEventRelativeDate(eventStartDate, eventStartTime)}`;
-    const endP = document.createElement("p");
-    endP.textContent = `Fin : ${formatEventRelativeDate(eventEndDate, eventEndTime)}`;
+    const startDateBadge = formatBadgeDate(eventStartDate);
+    const dateParagraph = document.createElement("p");
+    dateParagraph.textContent = `${startDateBadge.dayName} ${startDateBadge.dayNumber} ${startDateBadge.monthName}`;
+    const labelParagraph = document.createElement("p");
+    labelParagraph.textContent = eventLabel;
+    const typeParagraph = document.createElement("p");
+    typeParagraph.textContent = eventType;
+    const addressParagraph = document.createElement("p");
+    addressParagraph.textContent = `${eventStreetAddress} à ${eventAddressLocality}`;
+    const startParagraph = document.createElement("p");
+    startParagraph.textContent = `Début : ${formatEventRelativeDate(eventStartDate, eventStartTime)}`;
+    const endParagraph = document.createElement("p");
+    endParagraph.textContent = `Fin : ${formatEventRelativeDate(eventEndDate, eventEndTime)}`;
 
-    newEvent.append(dateP, labelP, typeP, addressP, startP, endP);
+    newEvent.append(dateParagraph, labelParagraph, typeParagraph, addressParagraph, startParagraph, endParagraph);
     highlightList.appendChild(newEvent);
 }
 
