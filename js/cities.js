@@ -54,6 +54,8 @@ async function fetchCities(query) {
 export function searchCities(text) {
   const query = text.trim();
   selectedCity = null;
+  cities = [];
+  closeCities();
   clearTimeout(searchTimer);
 
   if (query.length < 2 || /^\d{1,4}$/.test(query)) {
